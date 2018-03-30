@@ -1015,16 +1015,10 @@ final class ColSer implements Serializable {
                 default:
                     throw new InvalidObjectException(String.format("invalid flags 0x%x", tag));
             }
-        } catch (NullPointerException ex) {
-            throw ioe(ex);
-        } catch (IllegalArgumentException ex) {
-            throw ioe(ex);
+        } catch (NullPointerException | IllegalArgumentException ex) {
+            InvalidObjectException ioe = new InvalidObjectException("invalid object");
+            ioe.initCause(ex);
+            throw ioe;
         }
-    }
-
-    private static InvalidObjectException ioe(RuntimeException ex) {
-        InvalidObjectException ioe = new InvalidObjectException("invalid object");
-        ioe.initCause(ex);
-        return ioe;
     }
 }
