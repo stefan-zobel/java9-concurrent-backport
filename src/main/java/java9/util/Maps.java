@@ -53,7 +53,7 @@ import java.util.Map;
  * static factory method result in {@code IllegalArgumentException}.
  * <li>The iteration order of mappings is unspecified and is subject to change.
  * <li>They are <a
- * href="../lang/package-summary.html#Value-based-Classes">value-based</a>. Callers
+ * href="package-summary.html#Value-based-Classes">value-based</a>. Callers
  * should make no assumptions about the identity of the returned instances.
  * Factories are free to create new instances or reuse existing ones. Therefore,
  * identity-sensitive operations on these instances (reference equality (
@@ -422,7 +422,7 @@ public final class Maps {
      * <li>They are unmodifiable. Calls to {@link Map.Entry#setValue Entry.setValue()}
      * on a returned {@code Entry} result in {@code UnsupportedOperationException}.
      * <li>They are not serializable.
-     * <li>They are <a href="../lang/package-summary.html#Value-based-Classes">value-based</a>.
+     * <li>They are <a href="package-summary.html#Value-based-Classes">value-based</a>.
      * Callers should make no assumptions about the identity of the returned instances.
      * This method is free to create new instances or reuse existing ones. Therefore,
      * identity-sensitive operations on these instances (reference equality ({@code ==}),

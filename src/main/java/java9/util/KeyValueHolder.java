@@ -31,7 +31,7 @@ import java.util.Objects;
  * An immutable container for a key and a value, suitable for use
  * in creating and populating {@code Map} instances.
  *
- * <p>This is a <a href="../lang/package-summary.html#Value-based-Classes">value-based</a>
+ * <p>This is a <a href="package-summary.html#Value-based-Classes">value-based</a>
  * class; use of identity-sensitive operations (including reference equality
  * ({@code ==}), identity hash code, or synchronization) on instances of
  * {@code KeyValueHolder} may have unpredictable results and should be avoided.

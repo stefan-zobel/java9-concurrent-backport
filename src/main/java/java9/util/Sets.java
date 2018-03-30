@@ -56,7 +56,7 @@ import java.util.Set;
  * <li>The iteration order of set elements is unspecified and is subject to
  * change.
  * <li>They are
- * <a href="../lang/package-summary.html#Value-based-Classes">value-based</a>. Callers
+ * <a href="package-summary.html#Value-based-Classes">value-based</a>. Callers
  * should make no assumptions about the identity of the returned instances.
  * Factories are free to create new instances or reuse existing ones. Therefore,
  * identity-sensitive operations on these instances (reference equality (

@@ -52,7 +52,7 @@ import java.util.List;
  * <li>The order of elements in the list is the same as the order of the
  * provided arguments, or of the elements in the provided array.
  * <li>They are
- * <a href="../lang/package-summary.html#Value-based-Classes">value-based</a>.
+ * <a href="package-summary.html#Value-based-Classes">value-based</a>.
  * Callers should make no assumptions about the identity of the returned
  * instances. Factories are free to create new instances or reuse existing ones.
  * Therefore, identity-sensitive operations on these instances (reference
