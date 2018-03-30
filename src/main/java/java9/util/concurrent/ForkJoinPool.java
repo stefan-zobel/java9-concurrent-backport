@@ -932,7 +932,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                     int index = (al - 1) & --s;
                     long offset = ((long)index << ASHIFT) + ABASE;
                     ForkJoinTask<?> t = (ForkJoinTask<?>)
-                        getAndSetObject(a, offset, null);
+                        U.getAndSetObject(a, offset, null);
                     if (t != null) {
                         top = s;
                         U.storeFence();
@@ -961,7 +961,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                     int index = (al - 1) & b++;
                     long offset = ((long)index << ASHIFT) + ABASE;
                     ForkJoinTask<?> t = (ForkJoinTask<?>)
-                        getAndSetObject(a, offset, null);
+                        U.getAndSetObject(a, offset, null);
                     if (t != null) {
                         base = b;
                         t.doExec();
@@ -1311,44 +1311,6 @@ public class ForkJoinPool extends AbstractExecutorService {
     final ForkJoinWorkerThreadFactory factory;
     final UncaughtExceptionHandler ueh;  // per-worker UEH
     final Predicate<? super ForkJoinPool> saturate;
-
-    /**
-     * Atomically adds the given value to the current value of a field
-     * or array element within the given object {@code o}
-     * at the given {@code offset}.
-     *
-     * @param o object/array to update the field/element in
-     * @param offset field/element offset
-     * @param delta the value to add
-     * @return the previous value
-     * @since 1.8
-     */
-    static long getAndAddLong(Object o, long offset, long delta) {
-        long v;
-        do {
-            v = U.getLongVolatile(o, offset);
-        } while (!U.compareAndSwapLong(o, offset, v, v + delta));
-        return v;
-    }
-
-    /**
-     * Atomically exchanges the given reference value with the current
-     * reference value of a field or array element within the given
-     * object <code>o</code> at the given <code>offset</code>.
-     *
-     * @param o object/array to update the field/element in
-     * @param offset field/element offset
-     * @param newValue new value
-     * @return the previous value
-     * @since 1.8
-     */
-    static Object getAndSetObject(Object o, long offset, Object newValue) {
-        Object v;
-        do {
-            v = U.getObjectVolatile(o, offset);
-        } while (!U.compareAndSwapObject(o, offset, v, newValue));
-        return v;
-    }
 
     // Creating, registering and deregistering workers
 
@@ -1782,7 +1744,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                         ms = 1L;                       // avoid 0 for timed wait
                     if ((block = tryCompensate(w)) != 0) {
                         task.internalWait(ms);
-                        getAndAddLong(this, CTL, (block > 0) ? RC_UNIT : 0L);
+                        U.getAndAddLong(this, CTL, (block > 0) ? RC_UNIT : 0L);
                     }
                     s = task.status;
                 }
@@ -1817,7 +1779,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                             int qid = q.id;
                             if (released == 0) {    // increment
                                 released = 1;
-                                getAndAddLong(this, CTL, RC_UNIT);
+                                U.getAndAddLong(this, CTL, RC_UNIT);
                             }
                             int index = (al - 1) & b;
                             long offset = ((long)index << ASHIFT) + ABASE;
@@ -1840,7 +1802,7 @@ public class ForkJoinPool extends AbstractExecutorService {
             }
             if (quiet) {
                 if (released == 0)
-                    getAndAddLong(this, CTL, RC_UNIT);
+                    U.getAndAddLong(this, CTL, RC_UNIT);
                 w.source = prevSrc;
                 break;
             }
@@ -1849,7 +1811,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                     w.source = source = QUIET;
                 if (released == 1) {                 // decrement
                     released = 0;
-                    getAndAddLong(this, CTL, RC_MASK & -RC_UNIT);
+                    U.getAndAddLong(this, CTL, RC_MASK & -RC_UNIT);
                 }
             }
         }
@@ -3194,7 +3156,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                         do {} while (!blocker.isReleasable() &&
                                      !blocker.block());
                     } finally {
-                        getAndAddLong(p, CTL, (block > 0) ? RC_UNIT : 0L);
+                        U.getAndAddLong(p, CTL, (block > 0) ? RC_UNIT : 0L);
                     }
                     break;
                 }

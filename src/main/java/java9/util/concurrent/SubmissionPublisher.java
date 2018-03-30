@@ -1058,7 +1058,7 @@ public class SubmissionPublisher<T> implements Publisher<T> {
 
         final long subtractDemand(int k) {
             long n = (long) (-k);
-            return n + (long) ForkJoinPool.getAndAddLong(this, DEMAND, n);
+            return n + (long) U.getAndAddLong(this, DEMAND, n);
         }
 
         final boolean casDemand(long cmp, long val) {
