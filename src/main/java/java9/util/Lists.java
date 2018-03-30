@@ -28,11 +28,10 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * A place for static default implementations of the new Java 8 default
- * interface methods and static interface methods in the {@link List} interface
- * and, in addition, the <a href="http://openjdk.java.net/jeps/269">JEP 269</a>
- * {@code "Unmodifiable List Static Factory Methods"} in the {@link List}
- * interface that were introduced in Java 9.
+ * A place for the implementations of the new Java 9 static interface methods
+ * in the {@link List} interface specified in
+ * <a href="http://openjdk.java.net/jeps/269">JEP 269</a>
+ * {@code "Unmodifiable List Static Factory Methods"}.
  *
  * <h2><a id="unmodifiable">Unmodifiable Lists</a></h2>
  * <p>
@@ -60,6 +59,8 @@ import java.util.List;
  * equality ( {@code ==}), identity hash code, and synchronization) are
  * unreliable and should be avoided.
  * </ul>
+ * 
+ * @since 9
  */
 public final class Lists {
 

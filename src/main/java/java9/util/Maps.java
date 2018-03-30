@@ -27,11 +27,10 @@ package java9.util;
 import java.util.Map;
 
 /**
- * A place for static default implementations of the new Java 8 default
- * interface methods and static interface methods in the {@link Map} interface
- * and, in addition, the <a href="http://openjdk.java.net/jeps/269">JEP 269</a>
- * {@code "Unmodifiable Map Static Factory Methods"} in the {@link Map}
- * interface that were introduced in Java 9.
+ * A place for the implementations of the new Java 9 static interface methods
+ * in the {@link Map} interface specified in
+ * <a href="http://openjdk.java.net/jeps/269">JEP 269</a>
+ * {@code "Unmodifiable Map Static Factory Methods"}.
  *
  * <h2><a id="unmodifiable">Unmodifiable Maps</a></h2>
  * <p>The {@link Maps#of() Maps.of},
@@ -61,6 +60,8 @@ import java.util.Map;
  * {@code ==}), identity hash code, and synchronization) are unreliable and
  * should be avoided.
  * </ul>
+ * 
+ * @since 9
  */
 public final class Maps {
 

@@ -29,9 +29,8 @@ import java.util.function.Supplier;
 /**
  * This class consists of {@code static} utility methods for operating on
  * objects, or checking certain conditions before operation. These utilities
- * include {@code null}-safe or {@code null}-tolerant methods for computing the
- * hash code of an object, returning a string for an object, comparing two
- * objects, and checking if indexes or sub-range values are out-of-bounds.
+ * include {@code null}-safe or {@code null}-tolerant methods and methods
+ * for checking if indexes or sub-range values are out-of-bounds.
  *
  * <p>
  * <b>API Note:</b><br>
@@ -40,7 +39,7 @@ import java.util.function.Supplier;
  * provided for the convenience of checking if values corresponding to indexes
  * and sub-ranges are out-of-bounds.
  *
- * @since 1.7
+ * @since 9
  */
 public final class Objects {
     private Objects() {

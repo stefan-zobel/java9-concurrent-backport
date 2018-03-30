@@ -29,10 +29,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A place for the new Java 9 <a href="http://openjdk.java.net/jeps/269">JEP
- * 269</a> {@code "Unmodifiable Set Static Factory Methods"} in the {@link Set}
- * interface.
- *
+ * A place for the implementations of the new Java 9 static interface methods
+ * in the {@link Set} interface specified in
+ * <a href="http://openjdk.java.net/jeps/269">JEP 269</a>
+ * {@code "Unmodifiable Set Static Factory Methods"}.
+ * 
  * <h2><a id="unmodifiable">Unmodifiable Sets</a></h2>
  * <p>
  * The {@link Sets#of(Object...) Sets.of} and {@link Sets#copyOf Sets.copyOf}
