@@ -1162,7 +1162,7 @@ public class SubmissionPublisher<T> implements Publisher<T> {
                         newArray[t-- & newMask] = x;
                 }
                 array = newArray;
-                ForkJoinPool.MemBar.fullFence();         // release array and slots
+                U.fullFence();                    // release array and slots
                 return true;
             }
         }

@@ -26,7 +26,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Predicate;
 
@@ -789,7 +788,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                 top = s + 1;
                 U.putOrderedObject(a, offset, task);
                 if ((d = base - s) == 0 && p != null) {
-                    MemBar.fullFence();
+                    U.fullFence();
                     p.signalWork();
                 }
                 else if (d + al == 1)
@@ -822,7 +821,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                         U.compareAndSwapObject(oldA, offset, x, null))
                         a[b & mask] = x;
                 } while (++b != t);
-                MemBar.storeFence();
+                U.storeFence();
             }
             return a;
         }
@@ -841,7 +840,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                 if (t != null &&
                     U.compareAndSwapObject(a, offset, t, null)) {
                     top = s;
-                    MemBar.storeFence();
+                    U.storeFence();
                     return t;
                 }
             }
@@ -904,7 +903,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                 long offset = ((long)index << ASHIFT) + ABASE;
                 if (U.compareAndSwapObject(a, offset, task, null)) {
                     top = s;
-                    MemBar.storeFence();
+                    U.storeFence();
                     return true;
                 }
             }
@@ -936,7 +935,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                         getAndSetObject(a, offset, null);
                     if (t != null) {
                         top = s;
-                        MemBar.storeFence();
+                        U.storeFence();
                         t.doExec();
                         if (limit != 0 && --limit == 0)
                             break;
@@ -1007,7 +1006,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                                 long jOffset = (jindex << ASHIFT) + ABASE;
                                 U.putOrderedObject(wa, jOffset, f);
                             }
-                            MemBar.storeFence();
+                            U.storeFence();
                             t.doExec();
                         }
                         break;
@@ -1046,7 +1045,7 @@ public class ForkJoinPool extends AbstractExecutorService {
                                     if (U.compareAndSwapObject(a, offset,
                                                                t, null)) {
                                         top = s - 1;
-                                        MemBar.storeFence();
+                                        U.storeFence();
                                         t.doExec();
                                         help = true;
                                     }
@@ -3341,34 +3340,6 @@ public class ForkJoinPool extends AbstractExecutorService {
                         return new ForkJoinWorkerThread.
                             InnocuousForkJoinWorkerThread(pool); }},
                 ACC);
-        }
-    }
-
-    static final class MemBar {
-        private static final AtomicInteger x = new AtomicInteger();
-
-        static void loadFence() {
-            U.getIntVolatile(x, OFF);
-        }
-        static void storeFence() {
-            U.putOrderedInt(x, OFF, 0);
-        }
-        static void fullFence() {
-            U.putIntVolatile(x, OFF, 0);
-        }
-
-        private MemBar() {
-        }
-
-        // Unsafe mechanics
-        private static final sun.misc.Unsafe U = UnsafeAccess.unsafe;
-        private static final long OFF;
-        static {
-            try {
-                OFF = U.objectFieldOffset(AtomicInteger.class.getDeclaredField("value"));
-            } catch (Exception e) {
-                throw new ExceptionInInitializerError(e);
-            }
         }
     }
 }
