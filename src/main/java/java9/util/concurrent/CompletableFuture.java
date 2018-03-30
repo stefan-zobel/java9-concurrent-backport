@@ -2734,9 +2734,9 @@ public class CompletableFuture<T> implements Future<T>, CompletionStage<T> {
 
         static final ScheduledThreadPoolExecutor delayer;
         static {
-            /*(*/delayer = new ScheduledThreadPoolExecutor(
-                1, new DaemonThreadFactory())/*.
-                setRemoveOnCancelPolicy(true)*/;
+            (delayer = new ScheduledThreadPoolExecutor(
+                1, new DaemonThreadFactory())).
+                setRemoveOnCancelPolicy(true);
         }
     }
 
