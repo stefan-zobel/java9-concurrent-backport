@@ -7,6 +7,7 @@ package java9.util.concurrent;
 
 import java.security.AccessControlContext;
 import java.security.PrivilegedAction;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -19,13 +20,13 @@ import java.util.concurrent.atomic.AtomicLong;
 /*package*/ final class TLRandom {
 // CVS rev. 1.58
 
-    static long mix64(long z) {
+    private static long mix64(long z) {
         z = (z ^ (z >>> 33)) * 0xff51afd7ed558ccdL;
         z = (z ^ (z >>> 33)) * 0xc4ceb9fe1a85ec53L;
         return z ^ (z >>> 33);
     }
 
-    static int mix32(long z) {
+    private static int mix32(long z) {
         z = (z ^ (z >>> 33)) * 0xff51afd7ed558ccdL;
         return (int) (((z ^ (z >>> 33)) * 0xc4ceb9fe1a85ec53L) >>> 32);
     }
@@ -44,14 +45,8 @@ import java.util.concurrent.atomic.AtomicLong;
         int p = probeGenerator.addAndGet(PROBE_INCREMENT);
         int probe = (p == 0) ? 1 : p; // skip 0
         long seed = mix64(seeder.getAndAdd(SEEDER_INCREMENT));
-        setThreadLocalRandomSeed(seed);
+        utilizeSeed(seed);
         setThreadLocalRandomProbe(probe);
-    }
-
-    static final long nextSeed() {
-        long r; // read and update per-thread seed
-        setThreadLocalRandomSeed(r = getThreadLocalRandomSeed() + GAMMA);
-        return r;
     }
 
     // Within-package utilities
@@ -109,22 +104,15 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     private static final class SeedsHolder {
-        long threadSeed;
         int threadProbe;
         int threadSecondarySeed;
     }
 
-    // package-private for access from ThreadLocalRandom
-    static long getThreadLocalRandomSeed() {
-        return localSeeds.get().threadSeed;
+    private static void utilizeSeed(long seed) {
+        Objects.requireNonNull(Long.valueOf(seed));
     }
 
-    private static void setThreadLocalRandomSeed(long seed) {
-        localSeeds.get().threadSeed = seed;
-    }
-
-    // package-private for access from ThreadLocalRandom
-    static int getThreadLocalRandomProbe() {
+    private static int getThreadLocalRandomProbe() {
         return localSeeds.get().threadProbe;
     }
 
@@ -138,10 +126,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
     private static void setThreadLocalRandomSecondarySeed(int secondary) {
         localSeeds.get().threadSecondarySeed = secondary;
-    }
-
-    private static void setUncontendedToTrue(Integer isUncontended) {
-        U.putInt(isUncontended, VALUE_OFF, 1); // true
     }
 
     // Support for other package-private ThreadLocal access
@@ -166,11 +150,6 @@ import java.util.concurrent.atomic.AtomicLong;
     // Static initialization
 
     /**
-     * The seed increment.
-     */
-    private static final long GAMMA = 0x9e3779b97f4a7c15L;
-
-    /**
      * The increment for generating probe values.
      */
     private static final int PROBE_INCREMENT = 0x9e3779b9;
@@ -182,7 +161,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
     // Unsafe mechanics
     private static final sun.misc.Unsafe U = UnsafeAccess.unsafe;
-    private static final long VALUE_OFF;
     private static final long THREADLOCALS;
     private static final long INHERITABLETHREADLOCALS;
     private static final long INHERITEDACCESSCONTROLCONTEXT;
@@ -193,7 +171,6 @@ import java.util.concurrent.atomic.AtomicLong;
             INHERITABLETHREADLOCALS = U.objectFieldOffset(Thread.class.getDeclaredField("inheritableThreadLocals"));
             INHERITEDACCESSCONTROLCONTEXT = U
                     .objectFieldOffset(Thread.class.getDeclaredField("inheritedAccessControlContext"));
-            VALUE_OFF = U.objectFieldOffset(Integer.class.getDeclaredField("value"));
             CCL = U.objectFieldOffset(Thread.class.getDeclaredField("contextClassLoader"));
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
