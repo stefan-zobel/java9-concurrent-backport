@@ -17,6 +17,17 @@ corresponding `java.util` interfaces:
 * `java9.util.Sets`
 
 
+### Maven:
+
+```xml
+<dependency>
+    <groupId>net.sourceforge.streamsupport</groupId>
+    <artifactId>java9-concurrent-backport</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+
 ## LICENSE
 
 GNU General Public License, version 2, with the Classpath Exception
