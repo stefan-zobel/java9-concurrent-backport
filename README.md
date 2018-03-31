@@ -16,3 +16,7 @@ corresponding `java.util` interfaces:
 * `java9.util.Maps`
 * `java9.util.Sets`
 
+
+## LICENSE
+
+GNU General Public License, version 2, with the Classpath Exception

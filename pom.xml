@@ -3,7 +3,29 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sourceforge.streamsupport</groupId>
 	<artifactId>java9-concurrent-backport</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
+	<name>net.sourceforge.streamsupport:java9-concurrent-backport</name>
+	<description>Backport of Java 9 CompletableFuture, Flow and SubmissionPublisher API for Java 8</description>
+	<url>https://github.com/stefan-zobel/java9-concurrent-backport/</url>
+	<licenses>
+		<license>
+			<name>GNU General Public License, version 2, with the Classpath Exception</name>
+			<url>http://openjdk.java.net/legal/gplv2+ce.html</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<name>Stefan Zobel</name>
+			<email>Spliterator@gmail.com</email>
+			<organization>net.sourceforge.streamsupport</organization>
+			<organizationUrl>https://github.com/stefan-zobel/</organizationUrl>
+		</developer>
+	</developers>
+	<scm>
+		<url>https://github.com/stefan-zobel/java9-concurrent-backport</url>
+		<connection>scm:git:https://github.com/stefan-zobel/java9-concurrent-backport.git</connection>
+		<developerConnection>scm:git:https://github.com/stefan-zobel/java9-concurrent-backport.git</developerConnection>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>Cp1252</project.build.sourceEncoding>
