@@ -25,7 +25,7 @@ corresponding `java.util` interfaces:
 <dependency>
     <groupId>net.sourceforge.streamsupport</groupId>
     <artifactId>java9-concurrent-backport</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
