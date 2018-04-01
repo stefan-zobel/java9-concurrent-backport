@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @since 1.7
  * @author Doug Lea
  */
-/*package*/ final class TLRandom {
+final class TLRandom {
 // CVS rev. 1.58
 
     private static long mix64(long z) {
@@ -103,29 +103,24 @@ import java.util.concurrent.atomic.AtomicLong;
         return r;
     }
 
-    private static final class SeedsHolder {
-        int threadProbe;
-        int threadSecondarySeed;
-    }
-
     private static void utilizeSeed(long seed) {
         Objects.requireNonNull(Long.valueOf(seed));
     }
 
     private static int getThreadLocalRandomProbe() {
-        return localSeeds.get().threadProbe;
+        return U.getInt(Thread.currentThread(), PROBE);
     }
 
     private static void setThreadLocalRandomProbe(int probe) {
-        localSeeds.get().threadProbe = probe;
+        U.putInt(Thread.currentThread(), PROBE, probe);
     }
 
     private static int getThreadLocalRandomSecondarySeed() {
-        return localSeeds.get().threadSecondarySeed;
+        return U.getInt(Thread.currentThread(), SECONDARY);
     }
 
     private static void setThreadLocalRandomSecondarySeed(int secondary) {
-        localSeeds.get().threadSecondarySeed = secondary;
+        U.putInt(Thread.currentThread(), SECONDARY, secondary);
     }
 
     // Support for other package-private ThreadLocal access
@@ -165,6 +160,8 @@ import java.util.concurrent.atomic.AtomicLong;
     private static final long INHERITABLETHREADLOCALS;
     private static final long INHERITEDACCESSCONTROLCONTEXT;
     private static final long CCL;
+    private static final long PROBE;
+    private static final long SECONDARY;
     static {
         try {
             THREADLOCALS = U.objectFieldOffset(Thread.class.getDeclaredField("threadLocals"));
@@ -172,17 +169,12 @@ import java.util.concurrent.atomic.AtomicLong;
             INHERITEDACCESSCONTROLCONTEXT = U
                     .objectFieldOffset(Thread.class.getDeclaredField("inheritedAccessControlContext"));
             CCL = U.objectFieldOffset(Thread.class.getDeclaredField("contextClassLoader"));
+            PROBE = U.objectFieldOffset(Thread.class.getDeclaredField("threadLocalRandomProbe"));
+            SECONDARY = U.objectFieldOffset(Thread.class.getDeclaredField("threadLocalRandomSecondarySeed"));
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
         }
     }
-
-    private static final ThreadLocal<SeedsHolder> localSeeds = new ThreadLocal<SeedsHolder>() {
-        @Override
-        protected SeedsHolder initialValue() {
-            return new SeedsHolder();
-        }
-    };
 
     /** Generates per-thread initialization/probe field */
     private static final AtomicInteger probeGenerator = new AtomicInteger();
