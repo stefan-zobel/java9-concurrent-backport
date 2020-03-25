@@ -644,7 +644,7 @@ public class ForkJoinPool extends AbstractExecutorService {
      * new ForkJoinWorkerThread using the system class loader as the
      * thread context class loader.
      */
-    private static final class DefaultForkJoinWorkerThreadFactory
+    /*package*/ static final class DefaultForkJoinWorkerThreadFactory
         implements ForkJoinWorkerThreadFactory {
         private static final AccessControlContext ACC = contextWithPermissions(
 //            new RuntimePermission("setContextClassLoader"), // java9-concurrent-backport changed
@@ -1776,7 +1776,6 @@ public class ForkJoinPool extends AbstractExecutorService {
                     if ((i = (r - j) & m) >= 0 && i < n && (q = ws[i]) != null) {
                         if ((b = q.base) - q.top < 0 &&
                             (a = q.array) != null && (al = a.length) > 0) {
-                            int qid = q.id;
                             if (released == 0) {    // increment
                                 released = 1;
                                 U.getAndAddLong(this, CTL, RC_UNIT);
@@ -2384,7 +2383,7 @@ public class ForkJoinPool extends AbstractExecutorService {
      * Constructor for common pool using parameters possibly
      * overridden by system properties
      */
-    private ForkJoinPool(byte forCommonPoolOnly) {
+    /*package*/ ForkJoinPool(byte forCommonPoolOnly) {
         int parallelism = -1;
         ForkJoinWorkerThreadFactory fac = null;
         UncaughtExceptionHandler handler = null;
@@ -3284,7 +3283,7 @@ public class ForkJoinPool extends AbstractExecutorService {
     /**
      * Factory for innocuous worker threads.
      */
-    private static final class InnocuousForkJoinWorkerThreadFactory
+    /*package*/ static final class InnocuousForkJoinWorkerThreadFactory
         implements ForkJoinWorkerThreadFactory {
 
         /**
