@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -75,8 +75,9 @@ public final class Maps {
      *
      * @since 9
      */
+    @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> of() {
-        return ImmutableCollections.emptyMap();
+        return (Map<K,V>) ImmutableCollections.EMPTY_MAP;
     }
 
     /**
@@ -393,7 +394,9 @@ public final class Maps {
     @SafeVarargs
     public static <K, V> Map<K, V> ofEntries(Map.Entry<? extends K, ? extends V>... entries) {
         if (entries.length == 0) { // implicit null check of entries array
-            return ImmutableCollections.emptyMap();
+            @SuppressWarnings("unchecked")
+            Map<K,V> map = (Map<K,V>) ImmutableCollections.EMPTY_MAP;
+            return map;
         } else if (entries.length == 1) {
             // implicit null check of the array slot
             return new ImmutableCollections.Map1<K, V>(entries[0].getKey(),
