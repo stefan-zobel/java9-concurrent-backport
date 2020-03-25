@@ -145,7 +145,8 @@ import static java9.util.concurrent.Flow.Subscription;
  * @author Doug Lea
  * @since 9
  */
-public class SubmissionPublisher<T> implements Publisher<T> {
+public class SubmissionPublisher<T> implements Publisher<T>,
+                                               AutoCloseable {
 // CVS rev. 1.83
     /*
      * Most mechanics are handled by BufferedSubscription. This class
