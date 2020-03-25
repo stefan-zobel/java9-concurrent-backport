@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -145,15 +146,15 @@ import static java9.util.concurrent.Flow.Subscription;
  * @since 9
  */
 public class SubmissionPublisher<T> implements Publisher<T> {
-// CVS rev. 1.81
+// CVS rev. 1.83
     /*
      * Most mechanics are handled by BufferedSubscription. This class
      * mainly tracks subscribers and ensures sequentiality, by using
-     * built-in synchronization locks across public methods. Using
-     * built-in locks works well in the most typical case in which
-     * only one thread submits items. We extend this idea in
-     * submission methods by detecting single-ownership to reduce
-     * producer-consumer synchronization strength.
+     * locks across public methods, to ensure thread-safety in the
+     * presence of multiple sources and maintain acquire-release
+     * ordering around user operations. However, we also track whether
+     * there is only a single source, and if so streamline some buffer
+     * operations by avoiding some atomics.
      */
 
     /** The largest possible power of two array size. */
@@ -208,6 +209,8 @@ public class SubmissionPublisher<T> implements Publisher<T> {
      */
     BufferedSubscription<T> clients;
 
+    /** Lock for exclusion across multiple sources */
+    final ReentrantLock lock;
     /** Run status, updated only within locks */
     volatile boolean closed;
     /** Set true on first call to subscribe, to initialize possible owner */
@@ -247,6 +250,7 @@ public class SubmissionPublisher<T> implements Publisher<T> {
         Objects.requireNonNull(executor);
         if (maxBufferCapacity <= 0)
             throw new IllegalArgumentException("capacity must be positive");
+        this.lock = new ReentrantLock();
         this.executor = executor;
         this.onNextHandler = handler;
         this.maxBufferCapacity = roundCapacity(maxBufferCapacity);
@@ -310,13 +314,15 @@ public class SubmissionPublisher<T> implements Publisher<T> {
      */
     public void subscribe(Subscriber<? super T> subscriber) {
         Objects.requireNonNull(subscriber);
+        ReentrantLock lock = this.lock;
         int max = maxBufferCapacity; // allocate initial array
         Object[] array = new Object[max < INITIAL_CAPACITY ?
                                     max : INITIAL_CAPACITY];
         BufferedSubscription<T> subscription =
             new BufferedSubscription<T>(subscriber, executor, onNextHandler,
                                         array, max);
-        synchronized (this) {
+        lock.lock();
+        try {
             if (!subscribed) {
                 subscribed = true;
                 owner = Thread.currentThread();
@@ -351,6 +357,8 @@ public class SubmissionPublisher<T> implements Publisher<T> {
                     pred = b;
                 b = next;
             }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -363,7 +371,9 @@ public class SubmissionPublisher<T> implements Publisher<T> {
         Objects.requireNonNull(item);
         int lag = 0;
         boolean complete, unowned;
-        synchronized (this) {
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
             Thread t = Thread.currentThread(), o;
             BufferedSubscription<T> b = clients;
             if ((unowned = ((o = owner) != t)) && o != null)
@@ -394,6 +404,8 @@ public class SubmissionPublisher<T> implements Publisher<T> {
                 if (retries != null || cleanMe)
                     lag = retryOffer(item, nanos, onDrop, retries, lag, cleanMe);
             }
+        } finally {
+            lock.unlock();
         }
         if (complete)
             throw new IllegalStateException("Closed");
@@ -582,14 +594,18 @@ public class SubmissionPublisher<T> implements Publisher<T> {
      * subscribers have yet completed.
      */
     public void close() {
+        ReentrantLock lock = this.lock;
         if (!closed) {
             BufferedSubscription<T> b;
-            synchronized (this) {
+            lock.lock();
+            try {
                 // no need to re-check closed here
                 b = clients;
                 clients = null;
                 owner = null;
                 closed = true;
+            } finally {
+                lock.unlock();
             }
             while (b != null) {
                 BufferedSubscription<T> next = b.next;
@@ -613,9 +629,11 @@ public class SubmissionPublisher<T> implements Publisher<T> {
      */
     public void closeExceptionally(Throwable error) {
         Objects.requireNonNull(error);
+        ReentrantLock lock = this.lock;
         if (!closed) {
             BufferedSubscription<T> b;
-            synchronized (this) {
+            lock.lock();
+            try {
                 b = clients;
                 if (!closed) {  // don't clobber racing close
                     closedException = error;
@@ -623,6 +641,8 @@ public class SubmissionPublisher<T> implements Publisher<T> {
                     owner = null;
                     closed = true;
                 }
+            } finally {
+                lock.unlock();
             }
             while (b != null) {
                 BufferedSubscription<T> next = b.next;
@@ -660,7 +680,9 @@ public class SubmissionPublisher<T> implements Publisher<T> {
      */
     public boolean hasSubscribers() {
         boolean nonEmpty = false;
-        synchronized (this) {
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
             for (BufferedSubscription<T> b = clients; b != null;) {
                 BufferedSubscription<T> next = b.next;
                 if (b.isClosed()) {
@@ -672,6 +694,8 @@ public class SubmissionPublisher<T> implements Publisher<T> {
                     break;
                 }
             }
+        } finally {
+            lock.unlock();
         }
         return nonEmpty;
     }
@@ -682,9 +706,15 @@ public class SubmissionPublisher<T> implements Publisher<T> {
      * @return the number of current subscribers
      */
     public int getNumberOfSubscribers() {
-        synchronized (this) {
-            return cleanAndCount();
+        int n;
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            n = cleanAndCount();
+        } finally {
+            lock.unlock();
         }
+        return n;
     }
 
     /**
@@ -714,7 +744,9 @@ public class SubmissionPublisher<T> implements Publisher<T> {
      */
     public List<Subscriber<? super T>> getSubscribers() {
         ArrayList<Subscriber<? super T>> subs = new ArrayList<Subscriber<? super T>>();
-        synchronized (this) {
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
             BufferedSubscription<T> pred = null, next;
             for (BufferedSubscription<T> b = clients; b != null; b = next) {
                 next = b.next;
@@ -730,6 +762,8 @@ public class SubmissionPublisher<T> implements Publisher<T> {
                     pred = b;
                 }
             }
+        } finally {
+            lock.unlock();
         }
         return subs;
     }
@@ -743,8 +777,11 @@ public class SubmissionPublisher<T> implements Publisher<T> {
      */
     public boolean isSubscribed(Subscriber<? super T> subscriber) {
         Objects.requireNonNull(subscriber);
+        boolean subscribed = false;
+        ReentrantLock lock = this.lock;
         if (!closed) {
-            synchronized (this) {
+            lock.lock();
+            try {
                 BufferedSubscription<T> pred = null, next;
                 for (BufferedSubscription<T> b = clients; b != null; b = next) {
                     next = b.next;
@@ -755,14 +792,16 @@ public class SubmissionPublisher<T> implements Publisher<T> {
                         else
                             pred.next = next;
                     }
-                    else if (subscriber.equals(b.subscriber))
-                        return true;
+                    else if (subscribed = subscriber.equals(b.subscriber))
+                        break;
                     else
                         pred = b;
                 }
+            } finally {
+                lock.unlock();
             }
         }
-        return false;
+        return subscribed;
     }
 
     /**
@@ -775,7 +814,9 @@ public class SubmissionPublisher<T> implements Publisher<T> {
     public long estimateMinimumDemand() {
         long min = Long.MAX_VALUE;
         boolean nonEmpty = false;
-        synchronized (this) {
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
             BufferedSubscription<T> pred = null, next;
             for (BufferedSubscription<T> b = clients; b != null; b = next) {
                 int n; long d;
@@ -794,6 +835,8 @@ public class SubmissionPublisher<T> implements Publisher<T> {
                     pred = b;
                 }
             }
+        } finally {
+            lock.unlock();
         }
         return nonEmpty ? min : 0;
     }
@@ -806,7 +849,9 @@ public class SubmissionPublisher<T> implements Publisher<T> {
      */
     public int estimateMaximumLag() {
         int max = 0;
-        synchronized (this) {
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
             BufferedSubscription<T> pred = null, next;
             for (BufferedSubscription<T> b = clients; b != null; b = next) {
                 int n;
@@ -824,6 +869,8 @@ public class SubmissionPublisher<T> implements Publisher<T> {
                     pred = b;
                 }
             }
+        } finally {
+            lock.unlock();
         }
         return max;
     }
