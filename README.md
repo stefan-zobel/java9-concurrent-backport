@@ -4,11 +4,12 @@
 
 ![](art/streamsupport-sf.png)
 
-java9-concurrent-backport is a backport of the upgraded (`JEP 266`) Java 9 CompletableFuture API for Java 8.
+java9-concurrent-backport is a backport of the upgraded (`JEP 266`) Java 9 CompletableFuture API
+(extended by the new Java 12 CSR `JDK-8211010` exception handling methods) for Java 8.
 In addition, it contains a Java 8 version of the new Java 9 reactive-streams Flow and SubmissionPublisher
 API (also JEP 266) and of the new Java 9 Collections factory methods (`JEP 269`).
 
-The API is exactly the same as in Java 9 with the exception that it doesn't live in the package
+The API is exactly the same as in Java 12 with the exception that it doesn't live in the package
 `java.util(.concurrent)` but rather in the package `java9.util(.concurrent)`.
 
 The JEP 269 convenience factory methods for collections are located in companion classes for the
@@ -25,7 +26,7 @@ corresponding `java.util` interfaces:
 <dependency>
     <groupId>net.sourceforge.streamsupport</groupId>
     <artifactId>java9-concurrent-backport</artifactId>
-    <version>1.1.1</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
