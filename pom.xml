@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.sourceforge.streamsupport</groupId>
     <artifactId>java9-concurrent-backport</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.0.1</version>
     <name>net.sourceforge.streamsupport:java9-concurrent-backport</name>
     <description>Backport of Java 9 CompletableFuture, Flow and SubmissionPublisher API for Java 8</description>
     <url>https://github.com/stefan-zobel/java9-concurrent-backport/</url>
