@@ -1,4 +1,5 @@
 [![Maven Central](https://img.shields.io/maven-central/v/net.sourceforge.streamsupport/java9-concurrent-backport.svg)](http://mvnrepository.com/artifact/net.sourceforge.streamsupport/java9-concurrent-backport)
+[![javadoc.io](https://javadoc.io/badge2/net.sourceforge.streamsupport/java9-concurrent-backport/javadoc.svg)](https://javadoc.io/doc/net.sourceforge.streamsupport/java9-concurrent-backport)
 
 # java9-concurrent-backport
 
