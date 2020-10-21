@@ -38,4 +38,4 @@ The minimum runtime requirement is OpenJDK (Oracle) Java 8.
 
 ## LICENSE
 
-GNU General Public License, version 2, with the Classpath Exception
+GNU General Public License, version 2, with the Classpath Exception  (and [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) for JSR-166 derived code)
